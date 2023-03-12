@@ -27,6 +27,8 @@ async function lintPR() {
     },
   } = github.context.payload.pull_request;
 
+  console.log('github.context', github.context);
+
   const { data: pullRequest } = await client.pulls.get({
     owner,
     repo,

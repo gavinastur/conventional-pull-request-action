@@ -36413,6 +36413,8 @@ async function lintPR() {
     },
   } = github.context.payload.pull_request;
 
+  console.log('github.context', github.context);
+
   const { data: pullRequest } = await client.pulls.get({
     owner,
     repo,
@@ -36426,7 +36428,6 @@ async function lintPR() {
   } = await parserPreset(null, null);
 
   if (!IGNORE_COMMITS && pullRequest.commits <= 1) {
-
     const {
       data: [{ commit }],
     } = await client.pulls.listCommits({
@@ -36438,7 +36439,9 @@ async function lintPR() {
 
     const commitMessageSubject = getCommitSubject(commit.message);
 
-    const commitReport = await lint(commitMessageSubject, lintRules, { parserOpts });
+    const commitReport = await lint(commitMessageSubject, lintRules, {
+      parserOpts,
+    });
 
     commitReport.warnings.forEach((warn) =>
       core.warning(`Commit message: ${warn.message}`)
