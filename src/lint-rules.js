@@ -3,7 +3,7 @@ const path = require("path");
 const configConventional = require("@commitlint/config-conventional");
 const core = require("@actions/core");
 
-const actionMessage = require("./action-message.js");
+const actionMessage = require("./action-message");
 
 module.exports = async function getLintRules(actionConfig) {
   const { RULES_PATH, GITHUB_WORKSPACE } = actionConfig;

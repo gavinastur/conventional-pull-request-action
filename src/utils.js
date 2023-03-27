@@ -7,7 +7,9 @@ const getActionConfig = () => {
     COMMIT_TITLE_MATCH =
       ctmVal === true || ctmVal === false ? ctmVal : COMMIT_TITLE_MATCH;
     IGNORE_COMMITS =
-      ignoreCommitsVal === true || ignoreCommitsVal === false ? ignoreCommitsVal : IGNORE_COMMITS;
+      ignoreCommitsVal === true || ignoreCommitsVal === false
+        ? ignoreCommitsVal
+        : IGNORE_COMMITS;
   } catch (_) {
     // ignore json parse error
   }

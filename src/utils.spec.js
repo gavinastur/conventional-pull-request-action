@@ -1,4 +1,4 @@
-const { getActionConfig, getCommitSubject } = require("./utils.js");
+const { getActionConfig, getCommitSubject } = require("./utils");
 
 describe("getActionConfig", () => {
   beforeEach(() => {
@@ -11,9 +11,9 @@ describe("getActionConfig", () => {
 
   describe("when parsing action config booleans", () => {
     it.each([
-      ['COMMIT_TITLE_MATCH', true],
-      ['IGNORE_COMMITS', false]]
-    )("casts %s to boolean", (key, expected) => {
+      ["COMMIT_TITLE_MATCH", true],
+      ["IGNORE_COMMITS", false],
+    ])("casts %s to boolean", (key, expected) => {
       const configValue = getActionConfig()[key];
       expect(configValue).toEqual(expected);
     });

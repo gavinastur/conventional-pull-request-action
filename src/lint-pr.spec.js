@@ -1,15 +1,15 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 
-const { lintPR } = require("./lint-pr.js");
-const { getActionConfig } = require("./utils.js");
-const actionMessage = require("./action-message.js");
-const actionConfigFixture = require("./fixtures/action-config.js");
+const { lintPR } = require("./lint-pr");
+const { getActionConfig } = require("./utils");
+const actionMessage = require("./action-message");
+const actionConfigFixture = require("./fixtures/action-config");
 
 jest.mock("@actions/github");
 jest.mock("@actions/core");
-jest.mock("./utils.js", () => ({
-  ...jest.requireActual("./utils.js"),
+jest.mock("./utils", () => ({
+  ...jest.requireActual("./utils"),
   getActionConfig: jest.fn(),
 }));
 
@@ -44,11 +44,13 @@ github.context = {
 };
 
 const githubClient = {
-  pulls: {
-    get: jest.fn().mockReturnValue({ data: prFixture }),
-    listCommits: jest
-      .fn()
-      .mockReturnValue({ data: [{ commit: commitFixture }] }),
+  rest: {
+    pulls: {
+      get: jest.fn().mockReturnValue({ data: prFixture }),
+      listCommits: jest
+        .fn()
+        .mockReturnValue({ data: [{ commit: commitFixture }] }),
+    },
   },
 };
 
@@ -61,11 +63,11 @@ describe("lintPR", () => {
 
   it("lints with config-conventional parser options", async () => {
     const commitMeetsSpec = "feat!: exclamation mark will pass";
-    githubClient.pulls.listCommits.mockReturnValueOnce({
+    githubClient.rest.pulls.listCommits.mockReturnValueOnce({
       data: [{ commit: { ...commitFixture, message: commitMeetsSpec } }],
     });
 
-    githubClient.pulls.get.mockReturnValueOnce({
+    githubClient.rest.pulls.get.mockReturnValueOnce({
       data: { ...prFixture, commits: 1, title: commitMeetsSpec },
     });
 
@@ -85,7 +87,7 @@ describe("lintPR", () => {
           IGNORE_COMMITS: true,
         });
 
-        githubClient.pulls.listCommits.mockReturnValueOnce({
+        githubClient.rest.pulls.listCommits.mockReturnValueOnce({
           data: [{ commit: { ...commitFixture, message: "not conventional" } }],
         });
 
@@ -96,7 +98,7 @@ describe("lintPR", () => {
 
     describe("when COMMIT_TITLE_MATCH is true", () => {
       it("fails when pr title does not match the commit subject", async () => {
-        githubClient.pulls.get.mockReturnValueOnce({
+        githubClient.rest.pulls.get.mockReturnValueOnce({
           data: { ...prFixture, title: "feat: does not match commit" },
         });
 
@@ -114,7 +116,7 @@ describe("lintPR", () => {
           COMMIT_TITLE_MATCH: false,
         });
 
-        githubClient.pulls.get.mockReturnValueOnce({
+        githubClient.rest.pulls.get.mockReturnValueOnce({
           data: { ...prFixture, title: "feat: does not match commit" },
         });
 
@@ -123,7 +125,6 @@ describe("lintPR", () => {
       });
     });
 
-
     it("does not fail when commit message is to spec and pr title matches commit subject", async () => {
       await lintPR();
       expect(core.setFailed).not.toHaveBeenCalled();
@@ -131,11 +132,11 @@ describe("lintPR", () => {
 
     it("fetches pr commit", async () => {
       await lintPR();
-      expect(githubClient.pulls.listCommits).toHaveBeenCalledTimes(1);
+      expect(githubClient.rest.pulls.listCommits).toHaveBeenCalledTimes(1);
     });
 
     it("fails when commit message is not conventional", async () => {
-      githubClient.pulls.listCommits.mockReturnValueOnce({
+      githubClient.rest.pulls.listCommits.mockReturnValueOnce({
         data: [{ commit: { ...commitFixture, message: "not conventional" } }],
       });
 
@@ -148,7 +149,7 @@ describe("lintPR", () => {
 
   describe("when pull request has two or more commits", () => {
     it("does not fail when a PR title is to spec", async () => {
-      githubClient.pulls.get.mockReturnValueOnce({
+      githubClient.rest.pulls.get.mockReturnValueOnce({
         data: { ...prFixture, commits: 2 },
       });
 
@@ -157,10 +158,10 @@ describe("lintPR", () => {
     });
 
     it("does not fail when a commit message is not conventional", async () => {
-      githubClient.pulls.listCommits.mockReturnValueOnce({
+      githubClient.rest.pulls.listCommits.mockReturnValueOnce({
         data: [{ commit: { ...commitFixture, message: "not conventional" } }],
       });
-      githubClient.pulls.get.mockReturnValueOnce({
+      githubClient.rest.pulls.get.mockReturnValueOnce({
         data: { ...prFixture, commits: 2 },
       });
 
@@ -169,7 +170,7 @@ describe("lintPR", () => {
     });
 
     it("fails when the PR title is not conventional", async () => {
-      githubClient.pulls.get.mockReturnValueOnce({
+      githubClient.rest.pulls.get.mockReturnValueOnce({
         data: { ...prFixture, commits: 2, title: "not conventional" },
       });
 

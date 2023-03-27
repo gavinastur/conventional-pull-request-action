@@ -2,10 +2,10 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const lint = require("@commitlint/lint").default;
 const parserPreset = require("conventional-changelog-conventionalcommits");
-
-const { getActionConfig, getCommitSubject } = require("./utils.js");
-const actionMessage = require("./action-message.js");
-const getLintRules = require("./lint-rules.js");
+const { inspect } = require("util");
+const { getActionConfig, getCommitSubject } = require("./utils");
+const actionMessage = require("./action-message");
+const getLintRules = require("./lint-rules");
 
 async function lintPR() {
   const actionConfig = getActionConfig();
@@ -27,11 +27,12 @@ async function lintPR() {
     },
   } = github.context.payload.pull_request;
 
-  console.log('github.context', github.context);
+  core.info(`github.context: ${inspect(github.context, { depth: null })}`);
 
-  const { data: pullRequest } = await client.pulls.get({
+  const { data: pullRequest } = await client.rest.pulls.get({
     owner,
     repo,
+    // eslint-disable-next-line camelcase
     pull_number,
   });
   core.info(`Found PR title: ${pullRequest.title}`);
@@ -44,9 +45,10 @@ async function lintPR() {
   if (!IGNORE_COMMITS && pullRequest.commits <= 1) {
     const {
       data: [{ commit }],
-    } = await client.pulls.listCommits({
+    } = await client.rest.pulls.listCommits({
       owner,
       repo,
+      // eslint-disable-next-line camelcase
       pull_number,
       per_page: 1,
     });

@@ -1,9 +1,9 @@
 const core = require("@actions/core");
 
-const getLintRules = require("./lint-rules.js");
-const actionMessage = require("./action-message.js");
-const actionConfigFixture = require("./fixtures/action-config.js");
-const rulesFixture = require("./fixtures/commitlint.rules.js");
+const getLintRules = require("./lint-rules");
+const actionMessage = require("./action-message");
+const actionConfigFixture = require("./fixtures/action-config");
+const rulesFixture = require("./fixtures/commitlint.rules");
 
 jest.mock("@actions/core");
 jest.mock("@commitlint/config-conventional", () => ({
